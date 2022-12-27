@@ -6,6 +6,8 @@ var fs = require("fs");
 var filename = "nitros.txt";
 var API_END_POINT_START =
   "https://discordapp.com/api/v8/entitelemnts/gift-codes";
+var MAX_REQUESTS = 500;
+var MIN_REQUESTS = 10;
 let count;
 
 const countOfChecks = prompt(
@@ -13,9 +15,17 @@ const countOfChecks = prompt(
 );
 
 if (countOfChecks) {
-  count = parseInt(countOfChecks);
+  if (parseInt(countOfChecks) > MAX_REQUESTS) {
+    console.log(chalk.red(`You can only check ${MAX_REQUESTS} at the time!`));
+  } else if (parseInt(countOfChecks) < MIN_REQUESTS) {
+    console.log(
+      chalk.red(`You must check at least ${MIN_REQUESTS} at the time!`)
+    );
+  } else {
+    count = parseInt(countOfChecks);
+  }
 } else {
-  count = 300;
+  count = 200;
 }
 
 // Check Lines
@@ -29,16 +39,15 @@ async function checkLines() {
       const lines = data.split("\n");
       lines.forEach(async (line) => {
         fetch(`${API_END_POINT_START}/${line}`)
-          .then((res) => res.json())
-          .then((data) => {
-            if (data.code === 0) {
+          .then((res) => {
+            if (res.status === 200) {
               console.log(
-                chalk.red("Invalid Code Found > ") +
+                chalk.green("Valid Code Found > ") +
                   chalk.gray(`https://discord.gift/${line}`)
               );
             } else {
               console.log(
-                chalk.green("Valid Code Found > ") +
+                chalk.red("Invalid Code Found > ") +
                   chalk.gray(`https://discord.gift/${line}`)
               );
             }
