@@ -7,7 +7,6 @@ var fs = require("fs");
 const { Webhook, MessageBuilder } = require("discord-webhook-node");
 var { DISCORD_WEBHOOK_URI } = process.env;
 var Time = Date.now();
-var filename = "nitros.txt";
 
 // Default configuration
 var config = {
@@ -17,7 +16,16 @@ var config = {
     // If gift codes are invalid it will send a webhook.
     sendValidCodeHook: true,
     // If gift codes are invalid it will send a webhook.
-    sendInvalidCodeHook: false,
+    sendInvalidCodeHook: true,
+  },
+
+  general: {
+    filename: "nitros.txt",
+  },
+
+  colors: {
+    GREEN: "#26b55a",
+    RED: "#eb1e29",
   },
 
   limits: {
@@ -41,11 +49,11 @@ console.log();
 
 // Validate the countOfChecks
 if (countOfChecks) {
-  if (parseInt(countOfChecks) > config.limits.MAX_REQUESTSMAX_REQUESTS) {
+  if (parseInt(countOfChecks) > config.limits.MAX_REQUESTS) {
     console.log(
       chalk.red(`You can only check ${config.limits.MAX_REQUESTS} at the time!`)
     );
-  } else if (parseInt(countOfChecks) < config.limits.MIN_REQUESTSMIN_REQUESTS) {
+  } else if (parseInt(countOfChecks) < config.limits.MIN_REQUESTS) {
     console.log(
       chalk.red(
         `You must check at least ${config.limits.MIN_REQUESTSMIN_REQUESTS} at the time!`
@@ -60,7 +68,7 @@ if (countOfChecks) {
 
 // Check Lines
 async function checkLines() {
-  if (!fs.existsSync(filename)) {
+  if (!fs.existsSync(config.general.filename)) {
     console.log(chalk.red("The nitros file does not exist!"));
   } else {
     // The first Webhook That will be send
@@ -68,11 +76,12 @@ async function checkLines() {
     let embed = new MessageBuilder()
       .setTitle("🔨 Nitro Generator")
       .setDescription(`Generator was started up in: **${Date.now() - Time}ms**`)
-      .setColor("#26b55a");
+      .setColor(config.colors.GREEN)
+      .setTimestamp();
 
     hook.send(embed);
 
-    fs.readFile(filename, "utf8", (err, data) => {
+    fs.readFile(config.general.filename, "utf8", (err, data) => {
       if (err) throw err;
 
       const lines = data.split("\n");
@@ -93,7 +102,8 @@ async function checkLines() {
                   .setDescription(
                     `Valid Code Found > **https://discord.gift/${line}**`
                   )
-                  .setColor("#26b55a");
+                  .setColor(config.colors.GREEN)
+                  .setTimestamp();
 
                 hook.send(embed);
               }
@@ -110,7 +120,8 @@ async function checkLines() {
                   .setDescription(
                     `Invalid Code Found > **https://discord.gift/${line}**`
                   )
-                  .setColor("#eb1e29");
+                  .setColor(config.colors.RED)
+                  .setTimestamp();
 
                 hook.send(embed);
               }
@@ -129,7 +140,7 @@ function writeCountToFile(lines) {
   if (typeof lines !== "number") {
     console.log(chalk.red("The lines count must be a number."));
   } else {
-    if (fs.existsSync(filename)) {
+    if (fs.existsSync(config.general.filename)) {
       console.log(
         chalk.red("Nitro file already exists, delete it to make new nitros!")
       );
@@ -139,11 +150,11 @@ function writeCountToFile(lines) {
         line += `${id.generate({ length: 16 })}\n`;
       }
 
-      fs.writeFile(filename, line, (err) => {
+      fs.writeFile(config.general.filename, line, (err) => {
         if (err) throw err;
         console.log(
           chalk.green("The nitro links has been saved to: ") +
-            chalk.gray("nitros.txt")
+            chalk.gray(config.general.filename)
         );
 
         checkLines();
