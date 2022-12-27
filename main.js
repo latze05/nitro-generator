@@ -72,7 +72,7 @@ async function checkLines() {
     console.log(chalk.red("The nitros file does not exist!"));
   } else {
     // The first Webhook That will be send
-    var hook = new Webhook(DISCORD_WEBHOOK_URI);
+    var hook = new Webhook(config.webhooks.uri);
     let embed = new MessageBuilder()
       .setTitle("🔨 Nitro Generator")
       .setDescription(`Generator was started up in: **${Date.now() - Time}ms**`)
