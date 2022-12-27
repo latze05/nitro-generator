@@ -12,6 +12,8 @@ var filename = "nitros.txt";
 // Default configuration
 var config = {
   webhooks: {
+    // The URI of the webhook
+    uri: DISCORD_WEBHOOK_URI,
     // If gift codes are invalid it will send a webhook.
     sendValidCodeHook: true,
     // If gift codes are invalid it will send a webhook.
