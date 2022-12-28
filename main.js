@@ -21,8 +21,10 @@ var id = require("yourid");
 var chalk = require("chalk");
 var fs = require("fs");
 var open = require("open");
+var child_process = require("child_process");
 var { Webhook, MessageBuilder } = require("discord-webhook-node");
 var { DISCORD_WEBHOOK_URI } = process.env;
+var { main } = require("./package.json");
 var Time = Date.now();
 
 // Default configuration
@@ -39,7 +41,10 @@ var config = {
   general: {
     projectName: "Nitro Generator",
     filename: "nitros.txt",
+    requiredFile: ".env",
     github_url: "https://github.com/lassv/nitro-generator",
+    mainFile: main,
+    cmd: "node",
   },
 
   colors: {
@@ -91,6 +96,11 @@ const Options = [
 
   {
     id: 5,
+    text: "Setup up the project",
+  },
+
+  {
+    id: 6,
     text: "Exit program",
   },
 ];
@@ -109,18 +119,21 @@ const option = prompt(chalk.yellowBright("Enter your choice: "));
 const formatOption = parseInt(option);
 
 // The Choice Handler
-if (formatOption === 5) {
+if (formatOption === 6) {
   console.log(chalk.greenBright("Program was successfully exited!"));
   console.log();
   process.exit(0);
 } else if (formatOption === 1) {
   console.log();
+  checkSetup();
   checkAndCreate();
   writeCountToFile(count);
 } else if (formatOption === 2) {
   console.log();
+  checkSetup();
   checkLines();
 } else if (formatOption === 3) {
+  checkSetup();
   try {
     fs.unlinkSync(config.general.filename);
     console.log(chalk.greenBright("File was deleted successfully!"));
@@ -133,6 +146,8 @@ if (formatOption === 5) {
   setTimeout(() => {
     open(config.general.github_url);
   }, 500);
+} else if (formatOption === 5) {
+  setup();
 } else {
   console.log();
   console.log(chalk.redBright("No action taken, exiting program..."));
@@ -263,5 +278,55 @@ function writeCountToFile(lines) {
         checkLines();
       });
     }
+  }
+}
+
+// The setup function
+function setup() {
+  console.log();
+  if (fs.existsSync(config.general.requiredFile)) {
+    console.log(chalk.red("Your project is already setup!"));
+    console.log();
+  } else {
+    const webHookURI = prompt(chalk.gray("Enter your Discord Webhook URI: "));
+
+    if (!webHookURI) {
+      console.log(chalk.red("Webhook URI is required"));
+      console.log();
+    } else {
+      const fileContent = `DISCORD_WEBHOOK_URI = "${webHookURI}"`;
+
+      // Writing the file content
+      fs.writeFile(config.general.requiredFile, fileContent, (err) => {
+        if (err) throw err;
+        console.log();
+        console.log(chalk.green("Your project is now setup and ready to go! "));
+        const runProgramQuestion = prompt(
+          chalk.white("❓ Do you wan't me to run the program? (y/n) ")
+        );
+        console.log();
+
+        // Running the program
+        if (runProgramQuestion === "y" || "yes") {
+          child_process.execSync(
+            `${config.general.cmd} ${config.general.mainFile}`,
+            {
+              stdio: "inherit",
+            }
+          );
+        } else {
+          process.exit(0);
+        }
+      });
+    }
+  }
+}
+
+// Check if project is setup
+function checkSetup() {
+  if (!fs.existsSync(config.general.requiredFile)) {
+    console.log(chalk.red("Your project is not setup yet!"));
+    console.log();
+    setup();
   }
 }
