@@ -1,4 +1,4 @@
-# Nitro Generator
+# 🔨 Nitro Generator
 
 This is a simple script made using Javascript (node.js), that generates random id strings and checks them using the Discord API if its valid. This project was made for education purposes and will not be used by me.
 
