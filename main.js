@@ -20,7 +20,8 @@ var fetch = require("node-fetch");
 var id = require("yourid");
 var chalk = require("chalk");
 var fs = require("fs");
-const { Webhook, MessageBuilder } = require("discord-webhook-node");
+var open = require("open");
+var { Webhook, MessageBuilder } = require("discord-webhook-node");
 var { DISCORD_WEBHOOK_URI } = process.env;
 var Time = Date.now();
 
@@ -38,6 +39,7 @@ var config = {
   general: {
     projectName: "Nitro Generator",
     filename: "nitros.txt",
+    github_url: "https://github.com/lassv/nitro-generator",
   },
 
   colors: {
@@ -84,6 +86,11 @@ const Options = [
 
   {
     id: 4,
+    text: "Give a star on Github",
+  },
+
+  {
+    id: 5,
     text: "Exit program",
   },
 ];
@@ -102,7 +109,7 @@ const option = prompt(chalk.yellowBright("Enter your choice: "));
 const formatOption = parseInt(option);
 
 // The Choice Handler
-if (formatOption === 4) {
+if (formatOption === 5) {
   console.log(chalk.greenBright("Program was successfully exited!"));
   console.log();
   process.exit(0);
@@ -120,6 +127,17 @@ if (formatOption === 4) {
   } catch (err) {
     console.log(chalk.red(`Error: ${err.message}`));
   }
+} else if (formatOption === 4) {
+  console.log(chalk.blue("Thanks for your support! ❤"));
+  console.log();
+  setTimeout(() => {
+    open(config.general.github_url);
+  }, 500);
+} else {
+  console.log();
+  console.log(chalk.redBright("No action taken, exiting program..."));
+  console.log();
+  process.exit(1);
 }
 
 // Functions starts here
