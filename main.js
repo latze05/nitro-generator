@@ -1,3 +1,19 @@
+/*
+
+  Copyright (c) 2022 - Lasse Vestergaard
+  This program is free software: you can redistribute it and/or modify it. However, use it at your own risk.
+*/
+
+"use strict";
+
+/*
+ | \ | (_) |_ _ __ ___    / ___| ___ _ __   ___ _ __ __ _| |_ ___  _ __ 
+ |  \| | | __| '__/ _ \  | |  _ / _ \ '_ \ / _ \ '__/ _` | __/ _ \| '__|
+ | |\  | | |_| | | (_) | | |_| |  __/ | | |  __/ | | (_| | || (_) | |   
+ |_| \_|_|\__|_|  \___/   \____|\___|_| |_|\___|_|  \__,_|\__\___/|_|
+
+*/
+
 require("dotenv").config();
 var prompt = require("prompt-sync")();
 var fetch = require("node-fetch");
@@ -20,6 +36,7 @@ var config = {
   },
 
   general: {
+    projectName: "Nitro Generator",
     filename: "nitros.txt",
   },
 
@@ -41,29 +58,97 @@ var API_END_POINT_START =
 let count;
 
 // The main prompt
+
 console.log();
-const countOfChecks = prompt(
-  chalk.cyanBright("❓ How many Nitro gift links do you wan't to check? ")
-);
+console.log(chalk.blue("🔨 Welcome to Nitro Generator"));
+console.log();
+console.log(chalk.gray("What do you wan't to do?"));
 console.log();
 
-// Validate the countOfChecks
-if (countOfChecks) {
-  if (parseInt(countOfChecks) > config.limits.MAX_REQUESTS) {
-    console.log(
-      chalk.red(`You can only check ${config.limits.MAX_REQUESTS} at the time!`)
-    );
-  } else if (parseInt(countOfChecks) < config.limits.MIN_REQUESTS) {
-    console.log(
-      chalk.red(
-        `You must check at least ${config.limits.MIN_REQUESTSMIN_REQUESTS} at the time!`
-      )
-    );
-  } else {
-    count = parseInt(countOfChecks);
+// Options
+const Options = [
+  {
+    id: 1,
+    text: "Create and check nitro codes",
+  },
+
+  {
+    id: 2,
+    text: "Only check existing codes in the file",
+  },
+
+  {
+    id: 3,
+    text: "Delete your nitro file.",
+  },
+
+  {
+    id: 4,
+    text: "Exit program",
+  },
+];
+
+// Map thought the options
+Options.map((o) => {
+  console.log(`${o.id}. ${o.text}`);
+});
+
+console.log();
+
+// Enter the choice
+const option = prompt(chalk.yellowBright("Enter your choice: "));
+
+// Format the choice to a number
+const formatOption = parseInt(option);
+
+// The Choice Handler
+if (formatOption === 4) {
+  console.log(chalk.greenBright("Program was successfully exited!"));
+  console.log();
+  process.exit(0);
+} else if (formatOption === 1) {
+  console.log();
+  checkAndCreate();
+  writeCountToFile(count);
+} else if (formatOption === 2) {
+  console.log();
+  checkLines();
+} else if (formatOption === 3) {
+  try {
+    fs.unlinkSync(config.general.filename);
+    console.log(chalk.greenBright("File was deleted successfully!"));
+  } catch (err) {
+    console.log(chalk.red(`Error: ${err.message}`));
   }
-} else {
-  count = 200;
+}
+
+// Functions starts here
+function checkAndCreate() {
+  const countOfChecks = prompt(
+    chalk.cyanBright("❓ How many Nitro gift links do you wan't to check? ")
+  );
+  console.log();
+
+  // Validate the countOfChecks
+  if (countOfChecks) {
+    if (parseInt(countOfChecks) > config.limits.MAX_REQUESTS) {
+      console.log(
+        chalk.red(
+          `You can only check ${config.limits.MAX_REQUESTS} at the time!`
+        )
+      );
+    } else if (parseInt(countOfChecks) < config.limits.MIN_REQUESTS) {
+      console.log(
+        chalk.red(
+          `You must check at least ${config.limits.MIN_REQUESTS} at the time!`
+        )
+      );
+    } else {
+      count = parseInt(countOfChecks);
+    }
+  } else {
+    count = 200;
+  }
 }
 
 // Check Lines
@@ -146,7 +231,7 @@ function writeCountToFile(lines) {
       );
     } else {
       let line = "";
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < lines; i++) {
         line += `${id.generate({ length: 16 })}\n`;
       }
 
@@ -162,6 +247,3 @@ function writeCountToFile(lines) {
     }
   }
 }
-
-// Running the main function
-writeCountToFile(count);
