@@ -137,6 +137,7 @@ if (formatOption === 6) {
   try {
     fs.unlinkSync(config.general.filename);
     console.log(chalk.greenBright("File was deleted successfully!"));
+    runProgram({ timeout: true, time: 1500 });
   } catch (err) {
     console.log(chalk.red(`Error: ${err.message}`));
   }
@@ -170,12 +171,16 @@ function checkAndCreate() {
           `You can only check ${config.limits.MAX_REQUESTS} at the time!`
         )
       );
+
+      runProgram({ timeout: true, time: 1500 });
     } else if (parseInt(countOfChecks) < config.limits.MIN_REQUESTS) {
       console.log(
         chalk.red(
           `You must check at least ${config.limits.MIN_REQUESTS} at the time!`
         )
       );
+
+      runProgram({ timeout: true, time: 1500 });
     } else {
       count = parseInt(countOfChecks);
     }
@@ -188,6 +193,8 @@ function checkAndCreate() {
 async function checkLines() {
   if (!fs.existsSync(config.general.filename)) {
     console.log(chalk.red("The nitros file does not exist!"));
+
+    runProgram({ timeout: true, time: 1500 });
   } else {
     // The first Webhook That will be send
     var hook = new Webhook(config.webhooks.uri);
@@ -257,11 +264,15 @@ async function checkLines() {
 function writeCountToFile(lines) {
   if (typeof lines !== "number") {
     console.log(chalk.red("The lines count must be a number."));
+
+    runProgram({ timeout: true, time: 1500 });
   } else {
     if (fs.existsSync(config.general.filename)) {
       console.log(
         chalk.red("Nitro file already exists, delete it to make new nitros!")
       );
+
+      runProgram({ timeout: true, time: 1500 });
     } else {
       let line = "";
       for (let i = 0; i < lines; i++) {
@@ -301,22 +312,8 @@ function setup() {
         if (err) throw err;
         console.log();
         console.log(chalk.green("Your project is now setup and ready to go! "));
-        const runProgramQuestion = prompt(
-          chalk.white("❓ Do you wan't me to run the program? (y/n) ")
-        );
-        console.log();
 
-        // Running the program
-        if (runProgramQuestion === "y" || "yes") {
-          child_process.execSync(
-            `${config.general.cmd} ${config.general.mainFile}`,
-            {
-              stdio: "inherit",
-            }
-          );
-        } else {
-          process.exit(0);
-        }
+        runProgram({ timeout: true, time: 1500 });
       });
     }
   }
@@ -328,5 +325,25 @@ function checkSetup() {
     console.log(chalk.red("Your project is not setup yet!"));
     console.log();
     setup();
+  }
+}
+
+// Running program!
+function runProgram(options) {
+  if (options.timeout) {
+    setTimeout(() => {
+      console.clear();
+      child_process.execSync(
+        `${config.general.cmd} ${config.general.mainFile}`,
+        {
+          stdio: "inherit",
+        }
+      );
+    }, options.time);
+  } else {
+    console.clear();
+    child_process.execSync(`${config.general.cmd} ${config.general.mainFile}`, {
+      stdio: "inherit",
+    });
   }
 }
